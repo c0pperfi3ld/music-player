@@ -1,0 +1,66 @@
+# Audio files (songs)
+*.mp3
+*.wav
+*.flac
+*.m4a
+*.ogg
+*.opus
+*.aac
+*.webm
+*.wma
+*.alac
+*.aiff
+*.mid
+*.midi
+
+# Sensitive credentials, tokens, cookies, and keys
+.env
+.env.*
+*.env
+*.token
+*.key
+*.pem
+*.crt
+*.cert
+*.pfx
+*.p12
+id_rsa*
+*credentials*
+*secret*
+cookies.txt
+*.cookie
+
+# App runtime settings, user profile data & caches
+metadata_cache.json
+waveform_cache.json
+app_settings.json
+song_profiles.json
+tui_settings.json
+*.cache
+*.db
+*.sqlite
+*.sqlite3
+fx_cache/
+
+# Backups
+Backup/
+backups/
+config_backups/
+*.bak
+
+# Python cache & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+env/
+venv/
+
+# OS / Editor artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
