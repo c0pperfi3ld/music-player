@@ -1,70 +1,125 @@
-# 🎵 Audio Player Pro (v2)
-
 <div align="center">
 
-![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg?style=for-the-badge&logo=python&logoColor=white)
-![PyQt6](https://img.shields.io/badge/GUI-PyQt6-brightgreen.svg?style=for-the-badge&logo=qt&logoColor=white)
-![DSP & Audio](https://img.shields.io/badge/DSP-NumPy%20%7C%20FFT-orange.svg?style=for-the-badge)
-![License](https://img.shields.io/badge/license-MIT-purple.svg?style=for-the-badge)
+# ⚡ Audio Player Pro (v2)
+### *Next-Gen Desktop Music Engine & Cyberpunk Floating HUD*
+
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![PyQt6](https://img.shields.io/badge/PyQt6-GUI%20Framework-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://riverbankcomputing.com/software/pyqt/)
+[![DSP FFT](https://img.shields.io/badge/DSP-NumPy%20FFT%20Engine-013243?style=for-the-badge&logo=numpy&logoColor=white)](https://numpy.org)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-18181b?style=for-the-badge)](https://github.com/c0pperfi3ld/music-player)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blueviolet.svg?style=for-the-badge)](LICENSE)
+
+<br/>
 
 <p align="center">
-  <b>A high-performance desktop music player featuring real-time DSP spectrum visualizers, intelligent track profiling, A-B looping, and a futuristic floating mini-gadget HUD.</b>
+  <b>An audiophile-grade desktop music player marrying vectorized 60 FPS real-time DSP spectrum visualizations with an ultra-sleek, interactive floating mini-player HUD.</b>
 </p>
 
-[Key Features](#-key-features) • [Gadget HUD](#-mini-player-gadget-hud) • [Visualizers](#-dsp-audio-visualizers) • [Installation](#-quick-start) • [Shortcuts](#-keyboard-shortcuts)
+[✨ Interface Showcase](#-interface-showcase) • [⚡ Core Highlights](#-core-highlights) • [🔮 The Mini-Player HUD](#-the-mini-player-hud) • [🌌 Visualizer Engines](#-visualizer-suite) • [🚀 Quickstart](#-getting-started) • [⌨️ Hotkeys](#-keyboard-shortcuts)
+
+<br/>
 
 </div>
 
 ---
 
-## 🌟 Visual Showcase
+## ✨ Interface Showcase
 
 <div align="center">
 
 ### 🌌 Circular HUD (Dial Mode) & Card View
 
-| ⭕ Dial Mode (Symmetrical HUD) | 🎴 Card Mode (Compact Desktop View) |
+| ⭕ Cyberpunk Radial Dial HUD | 🎴 Compact Glass Card Mode |
 | :---: | :---: |
-| <img src="after_circle_idle.png" alt="Circle Dial Mode" width="380"/> | <img src="after_card_idle.png" alt="Card Mode" width="380"/> |
-| *Real-time spectrum ring, 5-star rating, centered playback controls, and glass utility dock* | *Waveform progress scrubber, live rank chip, and floating transport controls* |
+| <img src="after_circle_idle.png" alt="Circular Dial HUD" width="380"/> | <img src="after_card_idle.png" alt="Card Mode" width="380"/> |
+| *Real-time reactive audio spoke spectrum, dual progress & volume rings, interactive 5-star rating, and docked glass utility capsule.* | *Bilinear waveform scrubber, track rank badge, glowing transport deck, and edge-docked utility controls.* |
+
+<br/>
+
+### 🎨 Five Handcrafted Visual Themes & Skins
+
+<img src="skins_sheet.png" alt="Gadget Skins Suite" width="820"/>
+
+*Real dynamic shader-like themes: **Nightshift** (warm amber), **Vitals** (cyan/emerald), **Vinyl** (gold/obsidian), **Arcade** (neon pink), and **Prism** (orbital aurora).*
 
 </div>
 
 ---
 
-## ⚡ Key Features
+## ⚡ Core Highlights
 
-### 🎧 Core Playback Engine
-* **Universal Format Support**: Lossless FLAC, WAV, ALAC, AIFF, plus MP3, M4A, OGG, OPUS, and AAC.
-* **Precise Scrubbing & Seeking**: Smooth waveform scrubbing, millisecond-accurate seek bar, and relative jump controls (`←` / `→`).
-* **Variable Pitch & Speed**: Granular speed adjustment (0.25x – 2.0x) with high-fidelity pitch compensation.
-* **A-B Practice Looping**: Pinpoint start (A) and end (B) loop points with visual range indicators for musicians and transcription.
-* **Gapless Transitions & Shuffle**: Smart playlist queue management, track search filtering, and random shuffle.
+<table width="100%">
+<tr>
+<td width="50%" valign="top">
 
-### 🔮 Mini-Player Gadget HUD (Card & Dial)
-* **Dual Form Factor**:
-  * **Card Mode**: Elegant rectangular desk companion with full title, artist, seek track, volume slider, and track rank `#X/Y`.
-  * **Dial HUD Mode**: Cyberpunk-style circular widget featuring a glowing radial spectrum, smooth seek arc, and volume ring.
-* **Centered 3-Tier Architecture**:
-  * **Tier 1 (Top)**: Interactive 5-star rating system with real-time glow and specular shine.
-  * **Tier 2 (Center)**: True-centered transport controls (Previous `|<`, Main Play/Pause, and Next `>|`).
-  * **Tier 3 (Bottom)**: Refined glass utility dock (Always-on-Top Pin, Pane Selector, Settings Cogwheel, S/M/L Size Cycle, and Close).
-* **Always-on-Top & Edge Snapping**: Floats above other windows and softly snaps to display borders.
+### 🎧 Audiophile Playback Engine
+* **Universal Format Support**: Lossless FLAC, WAV, ALAC, AIFF alongside standard MP3, M4A, OGG, OPUS, AAC.
+* **Granular Pitch & Tempo**: Independent speed scale from `0.25x` to `2.0x` with formant-preserving pitch correction.
+* **Musician A-B Looping**: Instant punch-in/out loop markers with live colored waveform zone rendering.
+* **Microsecond Seek Engine**: Instant scrub response with smooth crossfade track transition protection.
 
-### 📊 Real-Time DSP Audio Visualizers
-Powered by vectorized NumPy FFT transforms for fluid 60 FPS rendering:
-* **Audio Starburst Galaxy**: Dynamic orbital star particle field reacting to frequency bands.
-* **Nebula Vortex**: Swirling cosmic vortex with reactive spectral motes.
-* **Sound Aurora**: Flowing multi-layered glowing frequency waves.
-* **Stereo Scope & Waterfall**: Dual-channel stereo visualizer and waterfall frequency waterfall.
-* **Retro Synth Grid**: 80s synthwave perspective wireframe floor with audio-reactive terrain.
+</td>
+<td width="50%" valign="top">
+
+### 🔮 Futuristic Floating Gadget HUD
+* **Dual Morphing Layouts**: Instant hotkey switch between clean horizontal **Card View** and radial **Dial HUD**.
+* **Centered Symmetry Architecture**: 3-tier balanced control layout (5-Star Rating, Main Playback, and Glass Capsule Dock).
+* **Always-On-Top Pinning**: Unobtrusive companion window with smooth window border edge-snapping.
+* **Hardware-Accelerated Glow**: Custom vector `QPainterPath` drawing with zero-flicker double-buffered rendering.
+
+</td>
+</tr>
+</table>
 
 ---
 
-## 🚀 Quick Start
+## 🔮 The Mini-Player HUD
+
+The mini-gadget (`Ctrl + G`) transforms the player into an ambient, space-efficient desktop companion:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      RADIAL DIAL HUD                        │
+├─────────────────────────────────────────────────────────────┤
+│  [Top Row]    ✦ ✦ ✦ ✦ ✧   Interactive 5-Star Track Rating   │
+│  [Center]     ⏮  ▶❚❚  ⏭   True-Centered Fluid Transport     │
+│  [Bottom]     [ 📌 🗖 ⚙ ⛶ ✕ ] Glass Capsule Utility Dock    │
+│  [Perimeter]  360° FFT Audio Motes & Reactive Spectrum Ring  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+* **Revamped Utility Dock**:
+  - **Pin** (`📌`): Toggle Always-on-Top desktop priority.
+  - **Pane** (`🗖`): Toggle mini audio-spectrum visualizer display.
+  - **Settings** (`⚙`): Direct 6-tooth mechanical cog icon triggering quick settings.
+  - **Size** (`⛶`): Seamless cycle through Small (`300px`), Medium (`372px`), and Large (`440px`).
+  - **Close** (`✕`): Quick dock dismissal.
+
+---
+
+## 🌌 Visualizer Suite
+
+Real-time audio decomposition powered by NumPy vectorized Fast Fourier Transforms (`rfft`):
+
+```
+┌──────────────────────┬────────────────────────────────────────────────────────┐
+│ Visualizer Mode      │ Visual Experience & Dynamics                           │
+├──────────────────────┼────────────────────────────────────────────────────────┤
+│ 🌠 Starburst Galaxy   │ Orbital stellar particle field reacting to bass peaks  │
+│ ✨ Nebula Vortex      │ Swirling interstellar cosmic vortex with spectral motes│
+│ 🌊 Sound Aurora      │ Multilayer luminous gradient waves across 64 bands     │
+│ ⚡ Stereo Scope      │ Dual-channel phase correlation vector oscilloscope     │
+│ 🌐 Retro Synth Grid  │ 80s synthwave perspective terrain reacting to kick drum│
+│ 💧 Waterfall Cascade │ Cascading spectral waterfall tracking frequency drift  │
+└──────────────────────┴────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🚀 Getting Started
 
 ### 1. Prerequisites
-Ensure you have **Python 3.10+** installed:
+Ensure you have **Python 3.10 or higher**:
 ```bash
 python --version
 ```
@@ -79,9 +134,8 @@ cd music-player
 ```bash
 pip install -r requirements.txt
 ```
-*(Dependencies: `PyQt6`, `numpy`, `mutagen`, `yt-dlp`)*
 
-### 4. Run the Player
+### 4. Launch the Player
 ```bash
 python audio_player_pro_v2.py
 ```
@@ -90,40 +144,50 @@ python audio_player_pro_v2.py
 
 ## ⌨️ Keyboard Shortcuts
 
-| Shortcut | Action |
+| Shortcut | Description |
 | :--- | :--- |
 | <kbd>Space</kbd> | Toggle Play / Pause |
 | <kbd>Ctrl</kbd> + <kbd>→</kbd> / <kbd>Ctrl</kbd> + <kbd>←</kbd> | Next / Previous Track |
-| <kbd>→</kbd> / <kbd>←</kbd> | Seek forward / backward (5 seconds) |
-| <kbd>↑</kbd> / <kbd>↓</kbd> | Volume Up / Down (2%) |
+| <kbd>→</kbd> / <kbd>←</kbd> | Relative seek (±5 seconds) |
+| <kbd>Shift</kbd> + <kbd>→</kbd> / <kbd>Shift</kbd> + <kbd>←</kbd> | Fine seek (±1 second) |
+| <kbd>↑</kbd> / <kbd>↓</kbd> | Volume Up / Down |
 | <kbd>M</kbd> | Mute / Unmute audio |
-| <kbd>Ctrl</kbd> + <kbd>G</kbd> | Toggle Mini-Player Gadget mode |
+| <kbd>Ctrl</kbd> + <kbd>G</kbd> | Toggle Mini-Player Gadget HUD |
 | <kbd>[</kbd> / <kbd>]</kbd> | Set Loop Point A / Set Loop Point B |
-| <kbd>\</kbd> | Clear A-B Loop |
+| <kbd>\</kbd> | Clear Active A-B Loop |
 | <kbd>1</kbd> – <kbd>5</kbd> | Rate track (1 to 5 Stars) |
-| <kbd>Esc</kbd> | Exit Gadget / Fullscreen Mode |
+| <kbd>Esc</kbd> | Dismiss Gadget or Fullscreen |
 
 ---
 
-## 🛠️ Architecture & Tech Stack
+## 🏗️ Architecture & Stack
 
 ```
 music-player/
-├── audio_player_pro_v2.py    # Main application (PyQt6 window, audio engine, Gadget HUD)
-├── design/                   # Visual design verification & render harness
-│   ├── gadget_study.py       # Headless study harness rendering pixel-exact UI snapshots
-│   └── circle_design.py      # Mathematical spline & circular geometry computations
-├── requirements.txt          # Python runtime dependencies
-└── .gitignore                # Strict privacy rules (excludes audio files, tokens, and caches)
+├── audio_player_pro_v2.py    # Core application (PyQt6 window, DSP engine, Gadget HUD)
+├── design/                   # Headless rendering & geometry design harness
+│   ├── gadget_study.py       # Standalone canvas snapshot verification runner
+│   └── circle_design.py      # Polar coordinate spline & circular arc math
+├── requirements.txt          # Python dependencies
+└── .gitignore                # Privacy contract: excludes all audio, tokens, & user data
 ```
 
-* **GUI Framework**: [PyQt6](https://www.riverbankcomputing.com/software/pyqt/) with custom hardware-accelerated `QPainter` drawing pipelines.
-* **Audio Backend**: `QMediaPlayer` / `QAudioOutput` with high-resolution position timing.
-* **DSP Processing**: Fast Fourier Transforms (`np.fft.rfft`) with logarithmic frequency band grouping.
-* **Metadata Extraction**: [Mutagen](https://mutagen.readthedocs.io/) for ID3, Vorbis, FLAC, and MP4 tag resolution.
+* **GUI & Graphics**: [PyQt6](https://www.riverbankcomputing.com/software/pyqt/) with pure hardware-accelerated `QPainter` drawing pipelines.
+* **DSP & FFT**: Vectorized NumPy linear algebra with logarithmic octave-band aggregation.
+* **Audio Playback**: `QMediaPlayer` / `QAudioOutput` with high-resolution frame-accurate timeline sync.
+* **Tagging & Metadata**: [Mutagen](https://mutagen.readthedocs.io/) stream parser for lossless and lossy codecs.
 
 ---
 
-## 📄 License
+## 🛡️ Privacy & Local-First Philosophy
+* **Zero Telemetry**: No trackers, analytics, or external phone-home requests.
+* **Local Identity**: All cache files, playlists, and track ratings remain local on your machine.
+* **Clean Repo Policy**: Audio files, credentials, and user playback history are strictly excluded by `.gitignore`.
 
-This project is licensed under the MIT License - feel free to customize and enjoy your music!
+---
+
+<div align="center">
+
+Distributed under the **MIT License**. Crafted with precision for high-performance audio playback.
+
+</div>
