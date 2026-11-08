@@ -5155,6 +5155,16 @@ class MiniPlayerGadget(QFrame):
         self._place()
         self.setWindowOpacity(self.opacity_val)
 
+        # the HUD is a full-window surface, so it owns the same mode shortcuts
+        # the header switch uses — otherwise Ctrl+2/3 would die the moment the
+        # main window hands the desk over to the gadget.
+        for seq, mode in (('Ctrl+1', 'full'), ('Ctrl+2', 'card'), ('Ctrl+3', 'dial')):
+            try:
+                sc = QShortcut(QKeySequence(seq), self)
+                sc.activated.connect(lambda m=mode: self.main.set_view_mode(m))
+            except Exception:
+                pass
+
     # ── persisted state ──────────────────────────────────────────────────────
     def state(self):
         w, h = self.width(), self.height()
@@ -6729,11 +6739,40 @@ class MiniPlayerGadget(QFrame):
             self._save()
         event.accept()
 
+    def set_shape(self, shape, animate=True):
+        """Flip the gadget between the card panel and the circular dial.
+
+        The two shapes want different footprints (the card is a wide panel, the
+        dial is square) and different layout tables, so this is a real resize +
+        re-layout, not a repaint. Double-click used to assign the attribute
+        straight and leave the dial's square frame behind the card.
+        """
+        shape = 'circle' if shape == 'circle' else 'card'
+        if shape == self.shape:
+            return False
+        self.shape = shape
+        keys = [s[0] for s in self.SIZES]
+        if self.size_key not in keys:
+            self.size_key = 'm'
+        self._custom_wh = None          # each shape owns its own footprint
+        self._place()
+        try:
+            self._clamp()
+        except Exception:
+            pass
+        self._layout_pane()
+        self._pane_rect = QRectF()
+        self.update()
+        try:
+            self.main._sync_view_mode_from_gadget(self.shape)
+        except Exception:
+            pass
+        self._save()
+        return True
+
     def mouseDoubleClickEvent(self, event):
         if self.shape == 'circle':
-            self.shape = 'card'
-            self._save()
-            self.update()
+            self.set_shape('card')
             event.accept()
             return
         if self._pane_rect.contains(event.position()):
@@ -6847,6 +6886,15 @@ class MiniPlayerGadget(QFrame):
             act.setChecked(abs(float(self.border_w) - bw) < 0.01)
             act.triggered.connect(
                 lambda _=False, v=bw: (setattr(self, 'border_w', v), self.update(), self._save()))
+        menu.addSeparator()
+        view_menu = menu.addMenu('Appearance mode')
+        for label, mm in (('▣  Full window   ·  Ctrl+1', 'full'),
+                          ('▬  Card HUD      ·  Ctrl+2', 'card'),
+                          ('◉  Dial HUD      ·  Ctrl+3', 'dial')):
+            act = view_menu.addAction(label)
+            act.setCheckable(True)
+            act.setChecked(getattr(self.main, '_view_mode', 'card') == mm)
+            act.triggered.connect(lambda _=False, m=mm: self.main.set_view_mode(m))
         menu.addSeparator()
         menu.addAction('Restore main window').triggered.connect(self.main._exit_gadget_mode)
         gp = event.globalPos() if hasattr(event, 'globalPos') else event.globalPosition().toPoint()
@@ -7868,6 +7916,171 @@ class SettingsWindow(QWidget):
         self.restyle(getattr(self.main, 't', THEMES['midnight']))
         super().showEvent(event)
 
+class ViewModeSwitch(QWidget):
+    """Segmented appearance switch: Full window ↔ Card HUD ↔ Dial HUD.
+
+    Three ways to change how the app looks used to live in three unrelated
+    places — minimise for the gadget, double-click to flip its shape, Escape to
+    come back. This one pill owns the whole axis: it animates, it stays legible
+    on every theme (dark text on a bright accent pill), and the segment it is
+    showing is exactly what the app restores on the next launch.
+    """
+    modeChanged = pyqtSignal(str)
+    MODES = (('full', '▣', 'Full'), ('card', '▬', 'Card'), ('dial', '◉', 'Dial'))
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName('viewModeSwitch')
+        self.setFixedHeight(26)
+        self.setMinimumWidth(204)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setMouseTracking(True)
+        self.setToolTip('Appearance mode — Ctrl+1 Full window · Ctrl+2 Card HUD · '
+                        'Ctrl+3 Dial HUD')
+        self._mode = 'full'
+        self._hover = -1
+        self._pos = 0.0                      # animated pill slot, in segments
+        self._accent = QColor('#22d3ee')
+        self._anim = QVariantAnimation(self)
+        self._anim.setDuration(240)
+        self._anim.setEasingCurve(QEasingCurve.Type.OutCubic)
+        self._anim.valueChanged.connect(self._on_anim)
+
+    # ── state ────────────────────────────────────────────────────────────────
+    @staticmethod
+    def keys():
+        return [k for k, _g, _l in ViewModeSwitch.MODES]
+
+    def mode(self):
+        return self._mode
+
+    def set_accent(self, colour):
+        try:
+            self._accent = QColor(colour)
+        except Exception:
+            self._accent = QColor('#22d3ee')
+        self.update()
+
+    def set_mode(self, mode, animate=True):
+        """Move the pill. Never emits — callers that own the state stay in charge."""
+        if mode not in self.keys():
+            return False
+        changed = mode != self._mode
+        self._mode = mode
+        idx = self.keys().index(mode)
+        if animate and self.isVisible() and changed:
+            self._anim.stop()
+            self._anim.setStartValue(float(self._pos))
+            self._anim.setEndValue(float(idx))
+            self._anim.start()
+        else:
+            self._pos = float(idx)
+            self.update()
+        return changed
+
+    def _on_anim(self, value):
+        self._pos = float(value)
+        self.update()
+
+    # ── geometry ─────────────────────────────────────────────────────────────
+    def _pad(self):
+        return 3.0
+
+    def _seg_w(self):
+        return (self.width() - self._pad() * 2.0) / float(len(self.MODES))
+
+    def _seg_rect(self, i):
+        pad = self._pad()
+        return QRectF(pad + i * self._seg_w(), pad,
+                      self._seg_w(), self.height() - pad * 2.0)
+
+    def _index_at(self, pos):
+        pad = self._pad()
+        span = self.width() - pad * 2.0
+        x = pos.x() - pad
+        if x < 0 or x > span or pos.y() < 0 or pos.y() > self.height():
+            return -1
+        return max(0, min(len(self.MODES) - 1, int(x / self._seg_w())))
+
+    # ── painting ─────────────────────────────────────────────────────────────
+    def paintEvent(self, event):
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+        r = QRectF(self.rect()).adjusted(0.5, 0.5, -0.5, -0.5)
+        rad = r.height() / 2.0
+
+        # trough: dark glass, hairline edge, faint top sheen
+        p.setPen(Qt.PenStyle.NoPen)
+        p.setBrush(QColor(0, 0, 0, 126))
+        p.drawRoundedRect(r, rad, rad)
+        p.setBrush(QColor(255, 255, 255, 11))
+        p.drawRoundedRect(QRectF(r.left(), r.top(), r.width(), r.height() * 0.5),
+                          rad, rad)
+        p.setPen(QPen(QColor(255, 255, 255, 32), 1.0))
+        p.setBrush(Qt.BrushStyle.NoBrush)
+        p.drawRoundedRect(r, rad, rad)
+
+        # sliding pill + accent bloom
+        seg = self._seg_rect(0)
+        pill = QRectF(self._pad() + self._pos * self._seg_w(), seg.top(),
+                      seg.width(), seg.height())
+        p.setPen(Qt.PenStyle.NoPen)
+        for k in range(6, 0, -1):
+            a = int(30 * (k / 6.0) ** 2)
+            p.setBrush(QColor(self._accent.red(), self._accent.green(),
+                              self._accent.blue(), a))
+            p.drawRoundedRect(pill.adjusted(-k, -k * 0.75, k, k * 0.75),
+                              pill.height() / 2.0 + k, pill.height() / 2.0 + k)
+        grad = QLinearGradient(pill.topLeft(), pill.bottomLeft())
+        grad.setColorAt(0.0, self._accent.lighter(124))
+        grad.setColorAt(1.0, self._accent.darker(116))
+        p.setBrush(QBrush(grad))
+        p.setPen(QPen(QColor(255, 255, 255, 160), 1.0))
+        p.drawRoundedRect(pill, pill.height() / 2.0, pill.height() / 2.0)
+
+        # labels
+        f = QFont('Segoe UI', 8)
+        f.setWeight(QFont.Weight.Bold)
+        f.setLetterSpacing(QFont.SpacingType.AbsoluteSpacing, 0.3)
+        p.setFont(f)
+        for i, (_key, glyph, label) in enumerate(self.MODES):
+            active = abs(self._pos - i) < 0.5
+            if active:
+                col = QColor(9, 16, 24, 242)
+            elif i == self._hover:
+                col = QColor(255, 255, 255, 245)
+            else:
+                col = QColor(255, 255, 255, 148)
+            p.setPen(col)
+            p.drawText(self._seg_rect(i), int(Qt.AlignmentFlag.AlignCenter),
+                       '%s  %s' % (glyph, label))
+
+    # ── input ────────────────────────────────────────────────────────────────
+    def mousePressEvent(self, event):
+        i = self._index_at(event.position())
+        if i >= 0:
+            key = self.MODES[i][0]
+            if key != self._mode:
+                self.set_mode(key)
+                self.modeChanged.emit(key)
+            event.accept()
+            return
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        i = self._index_at(event.position())
+        if i != self._hover:
+            self._hover = i
+            self.update()
+        super().mouseMoveEvent(event)
+
+    def leaveEvent(self, event):
+        if self._hover != -1:
+            self._hover = -1
+            self.update()
+        super().leaveEvent(event)
+
+
 class AudioPlayerPro(QMainWindow):
     """Studio-Grade Desktop Audio Workstation with granular controls and full persistence."""
     def __init__(self):
@@ -7892,6 +8105,9 @@ class AudioPlayerPro(QMainWindow):
         self._gadget_state_cache = {}
         self._settings_was_open = False
         self._start_in_gadget = False
+
+        # Appearance mode: 'full' (main window), 'card' or 'dial' (gadget HUD)
+        self._view_mode = 'full'
 
         # Library Folders (Multiple directories)
         self.library_folders = [
@@ -8068,6 +8284,7 @@ class AudioPlayerPro(QMainWindow):
 
         root_layout.addWidget(self.main_splitter, stretch=1)
         self._apply_theme()
+        self._install_view_shortcuts()
 
     def _create_header_bar(self):
         frame = QFrame()
@@ -8083,6 +8300,11 @@ class AudioPlayerPro(QMainWindow):
         font.setBold(True)
         brand.setFont(font)
         layout.addWidget(brand)
+
+        # Appearance mode switch: Full window / Card HUD / Dial HUD
+        self.view_switch = ViewModeSwitch()
+        self.view_switch.modeChanged.connect(self.set_view_mode)
+        layout.addWidget(self.view_switch)
 
         # Status Pill
         self.status_pill = QLabel('● READY')
@@ -9831,6 +10053,11 @@ class AudioPlayerPro(QMainWindow):
         }}
         """
         self.setStyleSheet(qss)
+        # the mode switch is custom-painted, so it needs the accent pushed (not styled)
+        try:
+            self.view_switch.set_accent(t['accent'])
+        except Exception:
+            pass
 
     def _on_theme_changed(self, idx):
         key = self.theme_combo.currentData()
@@ -11351,13 +11578,81 @@ class AudioPlayerPro(QMainWindow):
         self._apply_gadget_state(st)
         self._schedule_save_settings()
 
-    def _enter_gadget_mode(self):
-        if getattr(self, '_gadget_active', False) or not getattr(self, 'gadget_enabled', True):
+    # ── appearance modes: ONE switch for the whole axis ──────────────────────
+    def set_view_mode(self, mode, remember=True):
+        """Switch the app between the full window, the card HUD and the dial HUD.
+
+        Every other path into and out of the gadget (minimise, double-click,
+        Escape, the gadget's own ✕) funnels through here too, so the header
+        switch and the real window state can never disagree.
+        """
+        if mode not in ViewModeSwitch.keys():
+            return
+        if mode == 'full':
+            if getattr(self, '_gadget_active', False):
+                self._exit_gadget_mode()
+            else:
+                if self.isMinimized():
+                    self.showNormal()
+                self.show()
+                self.raise_()
+                self.activateWindow()
+        else:
+            g = self._ensure_gadget()
+            if g is None:
+                return
+            if not getattr(self, '_gadget_active', False):
+                self._enter_gadget_mode(force=True)
+            try:
+                g.set_shape('circle' if mode == 'dial' else 'card')
+            except Exception:
+                pass
+            # an explicit switch is a swap, not a minimise: the desk is handed
+            # over to the HUD even when the taskbar-hiding option is off
+            try:
+                self.hide()
+                g.show()
+                g.raise_()
+                g.activateWindow()
+            except Exception:
+                pass
+        self._view_mode = mode
+        self._sync_view_switch()
+        if remember:
+            self._schedule_save_settings()
+
+    def _sync_view_switch(self):
+        sw = getattr(self, 'view_switch', None)
+        if sw is not None:
+            try:
+                sw.set_mode(getattr(self, '_view_mode', 'full'))
+            except Exception:
+                pass
+
+    def _sync_view_mode_from_gadget(self, shape):
+        """Called by the gadget whenever its own shape changes (double-click)."""
+        self._view_mode = 'dial' if shape == 'circle' else 'card'
+        self._sync_view_switch()
+
+    def _install_view_shortcuts(self):
+        for seq, mode in (('Ctrl+1', 'full'), ('Ctrl+2', 'card'), ('Ctrl+3', 'dial')):
+            try:
+                sc = QShortcut(QKeySequence(seq), self)
+                sc.activated.connect(lambda m=mode: self.set_view_mode(m))
+            except Exception:
+                pass
+
+    def _enter_gadget_mode(self, force=False):
+        if getattr(self, '_gadget_active', False):
+            return
+        if not getattr(self, 'gadget_enabled', True) and not force:
             return
         g = self._ensure_gadget()
         if g is None:
             return
         self._gadget_active = True
+        self._view_mode = 'dial' if getattr(g, 'shape', 'card') == 'circle' else 'card'
+        self._sync_view_switch()
         try:
             self.visualizer.timer.stop()      # one visualizer clock at a time
         except Exception:
@@ -11419,6 +11714,8 @@ class AudioPlayerPro(QMainWindow):
                     sw.show()
             except Exception:
                 pass
+        self._view_mode = 'full'
+        self._sync_view_switch()
         self._schedule_save_settings()
 
     def _save_persisted_settings(self):
@@ -11457,6 +11754,7 @@ class AudioPlayerPro(QMainWindow):
                 'battery_anim_style': self.battery_volume.anim_style if hasattr(self, 'battery_volume') else 'plasma',
                 'theme': self.theme_key,
                 'vis_mode': self.visualizer.mode if hasattr(self, 'visualizer') else 'bars',
+                'view_mode': getattr(self, '_view_mode', 'full'),
                 'active_tab': self.tabs.currentIndex() if hasattr(self, 'tabs') else 0,
                 'sort_index': self.sort_combo.currentIndex() if hasattr(self, 'sort_combo') else 0,
                 'library_folders': self.library_folders,
@@ -11533,6 +11831,14 @@ class AudioPlayerPro(QMainWindow):
         gd = settings_dict.get('gadget')
         if isinstance(gd, dict):
             self._apply_gadget_state(gd)
+
+        # ── Appearance mode (kept in sync with the header switch) ──
+        vm = settings_dict.get('view_mode')
+        if vm in ViewModeSwitch.keys():
+            # the gadget's own saved shape wins while it is the active surface
+            if vm == 'full' or not getattr(self, '_gadget_active', False):
+                self._view_mode = vm
+        self._sync_view_switch()
 
         # ── Window Geometry & Position ──
         geo = settings_dict.get('window_geometry')
@@ -11719,6 +12025,11 @@ def main():
         window.showMinimized()      # last session ended in gadget mode
     else:
         window.show()
+        _mode = getattr(window, '_view_mode', 'full')
+        if _mode in ('card', 'dial'):
+            QTimer.singleShot(0, lambda: window.set_view_mode(_mode))
+        else:
+            window._sync_view_switch()
     sys.exit(app.exec())
 
 if __name__ == '__main__':
