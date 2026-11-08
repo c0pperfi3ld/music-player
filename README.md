@@ -35,21 +35,22 @@ One segmented switch in the header (**or `Ctrl+1` / `Ctrl+2` / `Ctrl+3`**) moves
 
 <table>
 <tr>
-<th align="center" width="33%">▣ Full Window</th>
-<th align="center" width="33%">▬ Card HUD</th>
-<th align="center" width="33%">◉ Dial HUD</th>
+<th align="center" width="50%">▬ Card HUD</th>
+<th align="center" width="50%">◉ Dial HUD</th>
 </tr>
 <tr>
-<td align="center"><img src="design/mode_full.png" alt="Full window" width="330"/></td>
-<td align="center"><img src="design/mode_card.png" alt="Card HUD" width="330"/></td>
-<td align="center"><img src="design/mode_dial.png" alt="Dial HUD" width="330"/></td>
+<td align="center"><img src="design/mode_card.png" alt="Card HUD" width="400"/></td>
+<td align="center"><img src="design/mode_dial.png" alt="Dial HUD" width="400"/></td>
 </tr>
 <tr>
-<td align="center" valign="top">Workstation layout: playlist table, spectrum pane, transport deck, 7-band EQ / remix rack and the YouTube downloader, all in one split workspace.</td>
 <td align="center" valign="top">A 348×168 desk companion: title, artist, waveform scrubber, star rating with live rank, transport keys and a volume rail.</td>
 <td align="center" valign="top">A 372×372 dial: 360° FFT spokes around a glowing seek ring, a volume ring, the rating row and a glass utility capsule.</td>
 </tr>
 </table>
+
+**▣ Full window** — the workstation surface the HUD is summoned from, and where it hands control back. One split layout holds the playlist table (rating, title, artist, duration, format, quality, size, folder origin, saved settings), the spectrum pane, the waveform overview with A/B loop markers, the transport deck, the remix rack and the YouTube downloader.
+
+> Screenshots above are the app's own widgets rendered offscreen by [`design/mode_probe.py`](design/mode_probe.py) in an empty state — no personal library is ever captured into this repository.
 
 <div align="center">
   <img src="design/switch_dial.png" alt="Appearance mode switch with Dial active" width="204"/>

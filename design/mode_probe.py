@@ -59,8 +59,12 @@ print('hit-test @6px    :', w.view_switch._index_at(QPointF(6, 13)), '(expect 0)
 print('hit-test @middle :', w.view_switch._index_at(
     QPointF(w.view_switch.width() / 2.0, 13)), '(expect 1)')
 
-grab(w, 'mode_full.png')
 print('mode/full        :', w._view_mode, '| window visible', w.isVisible())
+
+# The full-window grab shows whatever your real library holds (track titles,
+# folder origins), so it is opt-in and .gitignore'd — never commit one.
+if '--full' in sys.argv:
+    grab(w, 'mode_full.png')
 
 w.set_view_mode('card')
 pump()

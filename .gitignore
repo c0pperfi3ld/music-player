@@ -57,6 +57,11 @@ __pycache__/
 env/
 venv/
 
+# Local-only probe captures that can show a real library / real track titles.
+# These stay on disk for your own inspection but must never be committed.
+design/mode_full.png
+preview_gadget_album_art.png
+
 # OS / Editor artifacts
 .DS_Store
 Thumbs.db
